@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Launch Program",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args" : ["C:\\Users\\maxim\\OneDrive - Occitanie Numerique\\Documents\\FormationCybersecurite\\2 Clients\\DefiServices\\ALEXANDRE suivi.xlsx", "Feuil1"]
+        }
+    ]
+}
