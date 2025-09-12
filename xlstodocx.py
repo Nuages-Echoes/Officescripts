@@ -4,8 +4,8 @@ import shutil
 import os
 
 def lire_trois_premieres_colonnes_excel(chemin_fichier_excel, nom_feuille):
-    # Lire le fichier Excel avec pandas
-    df = pd.read_excel(chemin_fichier_excel, sheet_name=nom_feuille)
+    # Lire le fichier Excel avec pandas, en sautant les 14 premières lignes
+    df = pd.read_excel(chemin_fichier_excel, sheet_name=nom_feuille, skiprows=13)
 
     # Extraire les trois premières colonnes
     trois_premieres_colonnes = df.iloc[:, :3]  # Sélectionne les trois premières colonnes
@@ -29,8 +29,8 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
     doc.save(word_en_sortie)
 
 # Chemins des fichiers
-chemin_fichier_excel = r'C:\Users\maxim\VSCodeProject\Officescripts\DEFISERVICESTest.xlsm'
-nom_feuille = 'Feuil2'  # Remplacez par le nom de votre feuille Excel
+chemin_fichier_excel = r'C:\Users\maxim\VSCodeProject\Officescripts\TableauEntree.xlsm'
+nom_feuille = 'AVP'  # Remplacez par le nom de votre feuille Excel
 word_en_entree = r'C:\Users\maxim\VSCodeProject\Officescripts\DSTest.docx'  # Remplacez par le chemin de votre fichier Word
 word_en_sortie = r'C:\Users\maxim\VSCodeProject\Officescripts\sortie.docx'  # Remplacez par le chemin de votre fichier Word
 
