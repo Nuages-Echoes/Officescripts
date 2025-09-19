@@ -38,18 +38,45 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
     # Sauvegarder le document Word
     doc.save(word_en_sortie)
 
-#def mise_a_jour_signets(word_en_sortie, chemin_fichier_excel, param_nom_feuille):
-#    # Lire le fichier Excel avec pandas
-#    df = pd.read_excel(chemin_fichier_excel, sheet_name=param_nom_feuille)
+def lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille):
+    # Lire le fichier Excel avec pandas
+    df = pd.read_excel(param_chemin_fichier_excel, sheet_name=param_nom_feuille)
 
-#    # Charger le document Word existant
-#    doc = Document(word_en_sortie)
+     # Créer une liste pour stocker les valeurs des cellules D10 à D12
+    valeurs = []
 
-#    Adresse= df.at[7, 3]
-#     # Remplir les signets avec les valeurs des cellules Excel
-#    if doc.Bookmarks.Exists("Adresse"):
-#        doc.Bookmarks("Adresse").Range.Text = str(Adresse)
+    # Lire les valeurs des cellules D10 à D12
+    for i in range(9, 12):  # Les lignes 10 à 12 (inclus)
+        valeur = df.iloc[i - 1, 3]
+        valeurs.append(valeur)
 
+    return valeurs
+
+
+def mise_a_jour_signets(word_en_sortie, donnees_client):
+    # Charger le document Word existant
+    doc = Document(word_en_sortie)
+
+   # Créer une instance de Word
+    word_app = win32.gencache.EnsureDispatch('Word.Application')
+    word_app.Visible = False  # Ne pas rendre Word visible (pour un traitement en arrière-plan)
+
+    try:
+        # Ouvrir le document Word
+        doc = word_app.Documents.Open(word_en_sortie)
+
+        # Vérifier si le signet "AdresseProjet" existe et le remplir
+        if doc.Bookmarks.Exists("AdresseProjet"):
+            doc.Bookmarks("AdresseProjet").Range.Text = str(donnees_client[1])  # Valeur de D11
+
+        # Sauvegarder et fermer le document Word
+        doc.Save()
+        doc.Close()
+    except Exception as e:
+        print(f"Une erreur est survenue : {e}")
+    finally:
+        # Quitter Word
+        word_app.Quit()
 
 if __name__ == "__main__":
     if len(os.sys.argv) != 3:
@@ -77,14 +104,21 @@ if __name__ == "__main__":
 
 
 
-    # Lire la première colonne du fichier Excel
+    # Lire les 3 premières colonnes du fichier Excel
     donnees_premiere_colonne = lire_trois_premieres_colonnes_excel(param_chemin_fichier_excel, param_nom_feuille)
+
+    # Lire les informations client du fichier Excel
+    donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
+    
+    # Afficher les valeurs
+    print(f"Les valeurs des cellules D10 à D12 sont : {donnees_client}")
+
 
     # Ajouter les données dans le fichier Word existant
     ajouter_dans_fichier_word(word_en_sortie, donnees_premiere_colonne)
 
     # Mettre à jour les signets du document Word
-    # mise_a_jour_signets(word_en_sortie, param_chemin_fichier_excel, param_nom_feuille)
+    mise_a_jour_signets(word_en_sortie, donnees_client)
 
     
     print(f"Les données ont été ajoutées à {word_en_sortie}")
