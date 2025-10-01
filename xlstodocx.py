@@ -47,32 +47,34 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
                 doc.add_paragraph(str(valeur[1]), style='Heading 2')
             case 'Titre 3':
                 doc.add_paragraph(str(valeur[1]), style='Heading 3')
-            case _ :
+            case 'Normal':
                 doc.add_paragraph(str(valeur[1]), style='Normal')
-        if "rouge" in str(valeur[0]).lower():
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.color.rgb = RGBColor(255, 0, 0)  # Changer la couleur du texte en rouge
-        elif "bleu" in str(valeur[0]).lower():
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.color.rgb = RGBColor(0, 0, 255)  # Changer la couleur du texte en bleu
-        elif "vert" in str(valeur[0]).lower():
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.color.rgb = RGBColor(0, 255, 0)  # Changer la couleur du texte en vert
-        elif "violet" in str(valeur[0]).lower():
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.color.rgb = RGBColor(128, 0, 128)  # Changer la couleur du texte en violet
-        elif "orange" in str(valeur[0]).lower():
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.color.rgb = RGBColor(255, 165, 0)  # Changer la couleur du texte en orange
-        elif "barre" in str(valeur[0]).lower():
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.strike = True  # Appliquer le style barré
+            case "rouge" :
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.color.rgb = RGBColor(255, 0, 0)  # Changer la couleur du texte en rouge
+            case "bleu" :
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.color.rgb = RGBColor(0, 0, 255)  # Changer la couleur du texte en bleu
+            case "vert" :
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.color.rgb = RGBColor(0, 255, 0)  # Changer la couleur du texte en vert
+            case "violet" :
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.color.rgb = RGBColor(128, 0, 128)  # Changer la couleur du texte en violet
+            case "orange" :
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.color.rgb = RGBColor(255, 165, 0)  # Changer la couleur du texte en orange
+            case "barre" | "barré" :
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.strike = True  # Appliquer le style barré
+            case _:
+                doc.add_paragraph(str(valeur[1]), style='Normal')  
 
 
     # Sauvegarder le document Word
@@ -87,12 +89,17 @@ def lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille):
 
     # Lire les valeurs des cellules D4 à D12
     for i in range(9, 13):  # Les lignes 10 à 13 (inclus)
-        valeur = df.iloc[i - 1, ]
+        valeur = df.iloc[i - 1, 3]  # Colonne D (index 3)
         valeurs.append(valeur)
 
-    # Lire le nom du maître d'ouvrage dans la cellule F10
-    #nom_maitre_ouvrage = df.iloc[9 , 5]
-    #valeurs.append(nom_maitre_ouvrage)
+    # Recupérer le numero de version dans le nom de la feuille
+    param_sheet_split = param_nom_feuille.split(" ")
+    if len(param_sheet_split) > 1:
+        valeurs.append(param_sheet_split[0])  # Ajouter le type de document (AVP ou CCTP)
+        valeurs.append(param_sheet_split[1])  # Ajouter la version
+    else:
+        valeurs.append(param_sheet_split[0])  # Ajouter le type de document (AVP ou CCTP)
+        valeurs.append("1")  # Valeur par défaut si aucune version n'est trouvée
 
     return valeurs
 
@@ -133,7 +140,18 @@ def mise_a_jour_signets(word_en_sortie, donnees_client):
         # Vérifier si le signet "AdresseProjet" existe et le remplir
         if doc.Bookmarks.Exists("AdresseProjet"):
             doc.Bookmarks("AdresseProjet").Range.Text = str(donnees_client[1])  # Valeur de D11
-
+        if doc.Bookmarks.Exists("MaitreOuvrage"):
+            doc.Bookmarks("MaitreOuvrage").Range.Text = str(donnees_client[3])  # Valeur de D13
+        if doc.Bookmarks.Exists("VersionDocument"):
+            doc.Bookmarks("VersionDocument").Range.Text = str(donnees_client[5])  # Version du document
+        
+        # On modifie le titre du document en fonction du type de document
+        if doc.Bookmarks.Exists("TypeDocument"):
+            if str(donnees_client[4]) == "AVP":
+                doc.Bookmarks("TypeDocument").Range.Text = "Etude d'Avant-Projet \n(AVP)"
+            elif str(donnees_client[4]) == "CCTP":
+                doc.Bookmarks("TypeDocument").Range.Text = "Cahier des Clauses Techniques Particulières \n(CCTP)"
+        
         # Sauvegarder et fermer le document Word
         doc.Save()
         doc.Close()
