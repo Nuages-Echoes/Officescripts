@@ -35,11 +35,6 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
     # Ajouter chaque élément de la première colonne au document Word
     for valeur in donnees:
         
-        if (str(valeur[2]) != 'nan'):  # Vérifier si la troisième colonne n'est pas vide
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[2]))
-            run.bold = True  # Mettre le texte en gras
-            run.font.color.rgb = RGBColor(255, 0, 0)  # Changer la couleur du texte en rouge
         match valeur[0]:
             case 'Titre 1':
                 doc.add_paragraph(str(valeur[1]), style='Heading 1')
@@ -75,6 +70,11 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
                 run.font.strike = True  # Appliquer le style barré
             case _:
                 doc.add_paragraph(str(valeur[1]), style='Normal')  
+        if (str(valeur[2]) != 'nan') : # Vérifier si la troisième colonne n'est pas vide
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[2]))
+            run.bold = True  # Mettre le texte en gras
+            run.font.color.rgb = RGBColor(255, 0, 0)  # Changer la couleur du texte en rouge
 
 
     # Sauvegarder le document Word
@@ -171,13 +171,16 @@ if __name__ == "__main__":
 
     # Chemins des fichiers
     word_en_entree = r'C:\Users\maxim\VSCodeProject\Officescripts\DSTest.docx'  # Remplacez par le chemin de votre fichier Word
-    word_en_sortie = r'C:\Users\maxim\VSCodeProject\Officescripts\sortie.docx'  # Remplacez par le chemin de votre fichier Word
 
     try:
         # Vérifier si le fichier source existe
         if not os.path.exists(word_en_entree):
             raise FileNotFoundError(f"Le fichier source {word_en_entree} n'existe pas.")
 
+        # Lire les informations client du fichier Excel
+        donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
+        word_en_sortie = os.getcwd() + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
+    
         # Copier le fichier
         shutil.copy(word_en_entree, word_en_sortie)
         print(f"Le fichier a été copié de {word_en_entree} vers {word_en_sortie}")
@@ -190,8 +193,6 @@ if __name__ == "__main__":
     # Lire les 3 premières colonnes du fichier Excel
     donnees_premiere_colonne = lire_trois_premieres_colonnes_excel(param_chemin_fichier_excel, param_nom_feuille)
 
-    # Lire les informations client du fichier Excel
-    donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
     
     # Afficher les valeurs
     print(f"Les valeurs des cellules D10 à D12 sont : {donnees_client}")
