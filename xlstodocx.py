@@ -6,26 +6,25 @@ import shutil
 import os
 
 def lire_trois_premieres_colonnes_excel(chemin_fichier_excel, nom_feuille):
+    liste_artisans = []
     # Lire le fichier Excel avec pandas, en sautant les 14 premières lignes
     df = pd.read_excel(chemin_fichier_excel, sheet_name=nom_feuille, skiprows=13)
 
     # Extraire les trois premières colonnes
     trois_premieres_colonnes = df.iloc[:, :3]  # Sélectionne les trois premières colonnes
+    trois_premieres_colonnes = trois_premieres_colonnes.values.tolist()
+
+    # changer le nom de la feuille si c'est CCTP pour pointer sur la feuille AVP correspondante
+    # car seules les feuilles AVP contiennent la liste des artisans
+    if "CCTP" in nom_feuille:   
+        nom_feuille = nom_feuille.replace("CCTP", "AVP")
+        df = pd.read_excel(chemin_fichier_excel, sheet_name=nom_feuille, skiprows=13)
+        troisieme_colonne = df.iloc[:, 2]  # Sélectionne la troisième colonne
+        troisieme_colonne = troisieme_colonne.dropna().unique()  # Obtenir les valeurs uniques non nulles
+        liste_artisans = troisieme_colonne.tolist()
 
     # Retourner les données sous forme de liste de listes
-    return trois_premieres_colonnes.values.tolist()
-
-def conversion_style(style_excel):
-    # Dictionnaire de conversion des styles Excel vers les styles Word
-    conversion_dict = {
-        'Titre 1': 'Heading 1',
-        'Titre 2': 'Heading 2',
-        'Titre 3': 'Heading 3',
-        'Normal': 'Normal',
-        # Ajoutez d'autres conversions si nécessaire
-    }
-    return conversion_dict.get(style_excel, 'Normal')  # Retourne 'Normal' par défaut si le style n'est pas trouvé
-    
+    return trois_premieres_colonnes, liste_artisans
 
 def ajouter_dans_fichier_word(word_en_sortie, donnees):
    
@@ -76,9 +75,40 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
             run.bold = True  # Mettre le texte en gras
             run.font.color.rgb = RGBColor(255, 0, 0)  # Changer la couleur du texte en rouge
 
-
     # Sauvegarder le document Word
     doc.save(word_en_sortie)
+
+
+
+def ajouter_liste_artisans(word_en_sortie, liste_artisans):
+    # Charger le document Word existant
+    doc = Document(word_en_sortie)
+ 
+    doc.add_page_break()
+    doc.add_paragraph("Signatures et tampons", style='Heading 1')
+    doc.add_paragraph("Fait à Balma                                     le : ", style='Normal')
+    table = doc.add_table(rows=len(liste_artisans)+2, cols=4)
+    table.style = 'Table Grid'
+    hdr_cells = table.rows[0].cells
+    hdr_cells[1].text = 'Représenté par'
+    hdr_cells[2].text = 'Signature'
+    hdr_cells[3].text = 'Cachet'
+
+    hdr_cells = table.rows[1].cells
+    hdr_cells[0].text = 'Le maitre d\'ouvrage'
+    # Remplir les noms des entreprises dans la première colonne
+    for artisan_index, artisan in enumerate(liste_artisans):
+        hdr_cells = table.rows[artisan_index+2].cells
+        hdr_cells[0].text = f"{artisan}\n"
+
+    # Ajouter des lignes vides pour les entreprises
+    for _ in range(5):  # Ajouter 5 lignes vides, ajustez selon vos besoins
+        row_cells = table.add_row().cells
+        row_cells[0].text = ''
+        row_cells[1].text = ''
+    # Sauvegarder le document Word
+    doc.save(word_en_sortie)
+
 
 def lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille):
     # Lire le fichier Excel avec pandas
@@ -180,7 +210,6 @@ if __name__ == "__main__":
         # Lire les informations client du fichier Excel
         donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
         word_en_sortie = os.getcwd() + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
-    
         # Copier le fichier
         shutil.copy(word_en_entree, word_en_sortie)
         print(f"Le fichier a été copié de {word_en_entree} vers {word_en_sortie}")
@@ -190,16 +219,24 @@ if __name__ == "__main__":
 
 
 
-    # Lire les 3 premières colonnes du fichier Excel
-    donnees_premiere_colonne = lire_trois_premieres_colonnes_excel(param_chemin_fichier_excel, param_nom_feuille)
+    # Lire les 3 premières colonnes du fichier Excel et obtenir la liste des artisans
+    donnees_premiere_colonne, liste_artisans = lire_trois_premieres_colonnes_excel(param_chemin_fichier_excel, param_nom_feuille)
 
-    
+    # Creer la liste des artisans uniques
+    print(liste_artisans)
+
     # Afficher les valeurs
     print(f"Les valeurs des cellules D10 à D12 sont : {donnees_client}")
 
 
     # Ajouter les données dans le fichier Word existant
     ajouter_dans_fichier_word(word_en_sortie, donnees_premiere_colonne)
+
+    # Ajouter la liste des artisans si le document est un CCTP
+    if "CCTP" in word_en_sortie:
+        ajouter_liste_artisans(word_en_sortie, liste_artisans)
+        
+
 
     # Mettre à jour les signets du document Word
     mise_a_jour_signets(word_en_sortie, donnees_client)
