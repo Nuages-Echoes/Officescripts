@@ -33,42 +33,47 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
 
     # Ajouter chaque élément de la première colonne au document Word
     for valeur in donnees:
-        
-        match valeur[0]:
-            case 'Titre 1':
-                doc.add_paragraph(str(valeur[1]), style='Heading 1')
-            case 'Titre 2':
-                doc.add_paragraph(str(valeur[1]), style='Heading 2')
-            case 'Titre 3':
-                doc.add_paragraph(str(valeur[1]), style='Heading 3')
-            case 'Normal':
-                doc.add_paragraph(str(valeur[1]), style='Normal')
-            case "rouge" :
-                paragraph = doc.add_paragraph()
-                run = paragraph.add_run(str(valeur[1]))
-                run.font.color.rgb = RGBColor(255, 0, 0)  # Changer la couleur du texte en rouge
-            case "bleu" :
-                paragraph = doc.add_paragraph()
-                run = paragraph.add_run(str(valeur[1]))
-                run.font.color.rgb = RGBColor(0, 0, 255)  # Changer la couleur du texte en bleu
-            case "vert" :
-                paragraph = doc.add_paragraph()
-                run = paragraph.add_run(str(valeur[1]))
-                run.font.color.rgb = RGBColor(0, 255, 0)  # Changer la couleur du texte en vert
-            case "violet" :
-                paragraph = doc.add_paragraph()
-                run = paragraph.add_run(str(valeur[1]))
-                run.font.color.rgb = RGBColor(128, 0, 128)  # Changer la couleur du texte en violet
-            case "orange" :
-                paragraph = doc.add_paragraph()
-                run = paragraph.add_run(str(valeur[1]))
-                run.font.color.rgb = RGBColor(255, 165, 0)  # Changer la couleur du texte en orange
-            case "barre" | "barré" :
-                paragraph = doc.add_paragraph()
-                run = paragraph.add_run(str(valeur[1]))
+        v0 = str(valeur[0])
+        if 'Titre 1' in v0:
+            doc.add_paragraph(str(valeur[1]), style='Heading 1')
+        elif 'Titre 2' in v0:
+            doc.add_paragraph(str(valeur[1]), style='Heading 2')
+        elif 'Titre 3' in v0:
+            doc.add_paragraph(str(valeur[1]), style='Heading 3')
+        elif 'Normal' in v0:
+            doc.add_paragraph(str(valeur[1]), style='Normal')
+        elif 'jaune' in v0:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[1]))
+            run.font.color.rgb = RGBColor(255, 255, 0)  # Changer la couleur du texte en jaune
+            if 'barre' in v0 or 'barré' in v0:
                 run.font.strike = True  # Appliquer le style barré
-            case _:
-                doc.add_paragraph(str(valeur[1]), style='Normal')  
+        elif 'bleu' in v0:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[1]))
+            run.font.color.rgb = RGBColor(0, 0, 255)  # Changer la couleur du texte en bleu
+            if 'barre' in v0 or 'barré' in v0:
+                run.font.strike = True  # Appliquer le style barré
+        elif 'vert' in v0:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[1]))
+            run.font.color.rgb = RGBColor(20, 148, 20)  # Changer la couleur du texte en vert
+            if 'barre' in v0 or 'barré' in v0:
+                run.font.strike = True  # Appliquer le style barré
+        elif 'violet' in v0:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[1]))
+            run.font.color.rgb = RGBColor(128, 28, 248)  # Changer la couleur du texte en violet
+            if 'barre' in v0 or 'barré' in v0:
+                run.font.strike = True  # Appliquer le style barré
+        elif 'orange' in v0:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[1]))
+            run.font.color.rgb = RGBColor(233, 109, 0)  # Changer la couleur du texte en orange
+            if 'barre' in v0 or 'barré' in v0:
+                run.font.strike = True  # Appliquer le style barré
+        else:
+            doc.add_paragraph(str(valeur[1]), style='Normal')
         if (str(valeur[2]) != 'nan') : # Vérifier si la troisième colonne n'est pas vide
             paragraph = doc.add_paragraph()
             run = paragraph.add_run(str(valeur[2]))
@@ -95,17 +100,12 @@ def ajouter_liste_artisans(word_en_sortie, liste_artisans):
     hdr_cells[3].text = 'Cachet'
 
     hdr_cells = table.rows[1].cells
-    hdr_cells[0].text = 'Le maitre d\'ouvrage'
+    hdr_cells[0].text = 'Le maitre d\'ouvrage\n\n'
     # Remplir les noms des entreprises dans la première colonne
     for artisan_index, artisan in enumerate(liste_artisans):
         hdr_cells = table.rows[artisan_index+2].cells
-        hdr_cells[0].text = f"{artisan}\n"
+        hdr_cells[0].text = f"{artisan}\n\n"
 
-    # Ajouter des lignes vides pour les entreprises
-    for _ in range(5):  # Ajouter 5 lignes vides, ajustez selon vos besoins
-        row_cells = table.add_row().cells
-        row_cells[0].text = ''
-        row_cells[1].text = ''
     # Sauvegarder le document Word
     doc.save(word_en_sortie)
 
@@ -209,7 +209,9 @@ if __name__ == "__main__":
 
         # Lire les informations client du fichier Excel
         donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
-        word_en_sortie = os.getcwd() + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
+        # Définir le chemin du fichier Word de sortie qui va être dans le même dossier que le fichier Excel
+        word_en_sortie = os.path.dirname(param_chemin_fichier_excel) + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
+        # word_en_sortie = os.getcwd() + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
         # Copier le fichier
         shutil.copy(word_en_entree, word_en_sortie)
         print(f"Le fichier a été copié de {word_en_entree} vers {word_en_sortie}")

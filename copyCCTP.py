@@ -1,7 +1,7 @@
 import win32com.client as win32
 import sys
 
-def creer_feuille_chiffrage(chemin_fichier, nom_feuille):
+def creer_feuille_CCTP(chemin_fichier, nom_feuille):
     try:
         # Se connecter à l'instance existante de Excel
         excel = win32.gencache.EnsureDispatch('Excel.Application')
@@ -14,20 +14,13 @@ def creer_feuille_chiffrage(chemin_fichier, nom_feuille):
         sheet = workbook.Sheets(nom_feuille)
         sheet.Copy(After=workbook.Sheets(workbook.Sheets.Count))
         new_sheet = workbook.Sheets(workbook.Sheets.Count)
-        new_sheet.Name = f"Chiffrage {nom_feuille.split(' ')[1]}"
+        new_sheet.Name = f"CCTP {nom_feuille.split(' ')[1]}"
 
         # Effacer les données de la colonne C
         new_sheet.Range("C:C").ClearContents()
 
-        new_sheet.Range("C14").Value = "Unité"
-        new_sheet.Range("D14").Value = "Qté"
-        new_sheet.Range("E14").Value = "Prix HT Unitaire"
-        new_sheet.Range("F14").Value = "Montant HT"
-        new_sheet.Range("G14").Value = "Taux TVA"
-        new_sheet.Range("H14").Value = "Montant TTC"
+        
 
-        new_sheet.Range("F15:F300").Value = "=E15*D15"
-        new_sheet.Range("H15:H300").Value = "=F15*G15/100"
 
     except Exception as e:
         print(f"Une erreur est survenue : {e}")
@@ -40,4 +33,4 @@ if __name__ == "__main__":
     param_chemin_fichier_excel = sys.argv[1]
     param_nom_feuille = sys.argv[2]
 
-    creer_feuille_chiffrage(param_chemin_fichier_excel, param_nom_feuille)
+    creer_feuille_CCTP(param_chemin_fichier_excel, param_nom_feuille)
