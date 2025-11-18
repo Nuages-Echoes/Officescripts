@@ -73,7 +73,8 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
             if 'barre' in v0 or 'barré' in v0:
                 run.font.strike = True  # Appliquer le style barré
         else:
-            doc.add_paragraph(str(valeur[1]), style='Normal')
+            if str(valeur[1]) != 'nan':  # Vérifier si la deuxième colonne n'est pas vide
+                doc.add_paragraph(str(valeur[1]), style='Normal')
         if (str(valeur[2]) != 'nan') : # Vérifier si la troisième colonne n'est pas vide
             paragraph = doc.add_paragraph()
             run = paragraph.add_run(str(valeur[2]))
