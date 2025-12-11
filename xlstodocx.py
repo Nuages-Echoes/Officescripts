@@ -72,6 +72,10 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
             run.font.color.rgb = RGBColor(233, 109, 0)  # Changer la couleur du texte en orange
             if 'barre' in v0 or 'barré' in v0:
                 run.font.strike = True  # Appliquer le style barré
+        elif 'barre' in v0 or 'barré' in v0:
+            paragraph = doc.add_paragraph()
+            run = paragraph.add_run(str(valeur[1]))
+            run.font.strike = True  # Appliquer le style barré
         else:
             if str(valeur[1]) != 'nan':  # Vérifier si la deuxième colonne n'est pas vide
                 doc.add_paragraph(str(valeur[1]), style='Normal')
@@ -183,6 +187,10 @@ def mise_a_jour_signets(word_en_sortie, donnees_client):
             elif str(donnees_client[4]) == "CCTP":
                 doc.Bookmarks("TypeDocument").Range.Text = "Cahier des Clauses Techniques Particulières \n(CCTP)"
         
+        # Mettre à jour toutes les tables des matières
+        for table in doc.TablesOfContents:
+            table.Update()
+
         # Sauvegarder et fermer le document Word
         doc.Save()
         doc.Close()
