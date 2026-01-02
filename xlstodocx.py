@@ -117,14 +117,14 @@ def ajouter_liste_artisans(word_en_sortie, liste_artisans):
 
 def lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille):
     # Lire le fichier Excel avec pandas
-    df = pd.read_excel(param_chemin_fichier_excel, sheet_name=param_nom_feuille)
+    df = pd.read_excel(param_chemin_fichier_excel, sheet_name=param_nom_feuille, usecols="D:E")
 
      # Créer une liste pour stocker les valeurs des cellules D10 à D12
     valeurs = []
 
-    # Lire les valeurs des cellules D4 à D12
-    for i in range(9, 13):  # Les lignes 10 à 13 (inclus)
-        valeur = df.iloc[i - 1, 3]  # Colonne D (index 3)
+    #Lire les valeurs de la deuxième colonne pour les lignes 4 à 8 (E10 à E14 dans Excel)
+    for index in range(1, 5):  
+        valeur = df.iloc[index, 1]  # Colonne E (index 1)
         valeurs.append(valeur)
 
     # Recupérer le numero de version dans le nom de la feuille
@@ -136,6 +136,7 @@ def lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille):
         valeurs.append(param_sheet_split[0])  # Ajouter le type de document (AVP ou CCTP)
         valeurs.append("1")  # Valeur par défaut si aucune version n'est trouvée
 
+    print(f"Les valeurs extraites du fichier Excel sont : {valeurs}")
     return valeurs
 
 def supprimer_dossier_temp(nom_dossier):
@@ -174,11 +175,13 @@ def mise_a_jour_signets(word_en_sortie, donnees_client):
 
         # Vérifier si le signet "AdresseProjet" existe et le remplir
         if doc.Bookmarks.Exists("AdresseProjet"):
-            doc.Bookmarks("AdresseProjet").Range.Text = str(donnees_client[1])  # Valeur de D11
+            doc.Bookmarks("AdresseProjet").Range.Text = str(donnees_client[2])  
         if doc.Bookmarks.Exists("MaitreOuvrage"):
-            doc.Bookmarks("MaitreOuvrage").Range.Text = str(donnees_client[3])  # Valeur de D13
+            doc.Bookmarks("MaitreOuvrage").Range.Text = str(donnees_client[1])  
         if doc.Bookmarks.Exists("VersionDocument"):
             doc.Bookmarks("VersionDocument").Range.Text = str(donnees_client[5])  # Version du document
+        if doc.Bookmarks.Exists("CoordonneesClient"):
+            doc.Bookmarks("CoordonneesClient").Range.Text = str(donnees_client[3])  # Coordonnées du client
         
         # On modifie le titre du document en fonction du type de document
         if doc.Bookmarks.Exists("TypeDocument"):
@@ -194,6 +197,7 @@ def mise_a_jour_signets(word_en_sortie, donnees_client):
         # Sauvegarder et fermer le document Word
         doc.Save()
         doc.Close()
+        #print(f"Zeus")
     except Exception as e:
         print(f"Une erreur est survenue : {e}")
     finally:
@@ -207,10 +211,12 @@ if __name__ == "__main__":
 
     param_chemin_fichier_excel = os.sys.argv[1]
     param_nom_feuille = os.sys.argv[2]
-
+    
     # Chemins des fichiers
-    word_en_entree = r'C:\Users\maxim\VSCodeProject\Officescripts\DSTest.docx'  # Remplacez par le chemin de votre fichier Word
+    word_en_entree = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'DSTest.docx')  # Remplacez par le chemin de votre fichier Word
 
+    donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
+    print(f"Les données client sont : {donnees_client}")
     try:
         # Vérifier si le fichier source existe
         if not os.path.exists(word_en_entree):
@@ -219,7 +225,7 @@ if __name__ == "__main__":
         # Lire les informations client du fichier Excel
         donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
         # Définir le chemin du fichier Word de sortie qui va être dans le même dossier que le fichier Excel
-        word_en_sortie = os.path.dirname(param_chemin_fichier_excel) + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
+        word_en_sortie = os.path.dirname(param_chemin_fichier_excel) + "\\" + str(donnees_client[1]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
         # word_en_sortie = os.getcwd() + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
         # Copier le fichier
         shutil.copy(word_en_entree, word_en_sortie)
@@ -237,7 +243,7 @@ if __name__ == "__main__":
     print(liste_artisans)
 
     # Afficher les valeurs
-    print(f"Les valeurs des cellules D10 à D12 sont : {donnees_client}")
+    #print(f"Les valeurs des cellules D10 à D12 sont : {donnees_client}")
 
 
     # Ajouter les données dans le fichier Word existant
