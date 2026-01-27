@@ -4,6 +4,8 @@ from docx.shared import RGBColor
 import win32com.client as win32
 import shutil
 import os
+import datetime
+import locale
 
 def lire_trois_premieres_colonnes_excel(chemin_fichier_excel, nom_feuille):
     liste_artisans = []
@@ -189,6 +191,14 @@ def mise_a_jour_signets(word_en_sortie, donnees_client):
                 doc.Bookmarks("TypeDocument").Range.Text = "Etude d'Avant-Projet \n(AVP)"
             elif str(donnees_client[4]) == "CCTP":
                 doc.Bookmarks("TypeDocument").Range.Text = "Cahier des Clauses Techniques Particulières \n(CCTP)"
+        
+        # On ajout la date du jour au format jj mois aaaa
+        if doc.Bookmarks.Exists("DateGen"):
+            # Définir la locale en français pour obtenir le nom du mois en français
+            locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+            date_aujourdhui = datetime.datetime.now()
+            date_formatee = date_aujourdhui.strftime("%d %B %Y")
+            doc.Bookmarks("DateGen").Range.Text = date_formatee
         
         # Mettre à jour toutes les tables des matières
         for table in doc.TablesOfContents:
