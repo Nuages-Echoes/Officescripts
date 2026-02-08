@@ -1,3 +1,4 @@
+import numbers
 import win32com.client as win32
 import sys
 
@@ -27,7 +28,11 @@ def creer_feuille_chiffrage(chemin_fichier, nom_feuille):
         new_sheet.Range("H14").Value = "Montant TTC"
 
         new_sheet.Range("F15:F300").Value = "=E15*D15"
-        new_sheet.Range("H15:H300").Value = "=F15*G15/100"
+        new_sheet.Range("H15:H300").Value = "=(F15*(1+G15/100))"
+
+        for cellule in new_sheet.Range("G15:G300"):
+            cellule.NumberFormat = numbers.FORMAT_PERCENTAGE
+
 
     except Exception as e:
         print(f"Une erreur est survenue : {e}")

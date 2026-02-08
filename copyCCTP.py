@@ -18,9 +18,17 @@ def creer_feuille_CCTP(chemin_fichier, nom_feuille):
 
         # Effacer les données de la colonne C
         new_sheet.Range("C:C").ClearContents()
+        new_sheet.Range("A:A")
 
-        
+        # Supprimer la valeur de la colonne A à partir de la ligne 14 si elle ne contient pas "Titre"
+        for i in range(14, 500) :
+            if "barre" in str(new_sheet.Cells(i, 1).Value) :
+                new_sheet.Lines(i).Delete()  # Supprimer la ligne entière
+                continue  # Passer à la ligne suivante
+            if "Titre" not in str(new_sheet.Cells(i, 1).Value) :
+                new_sheet.Cells(i, 1).Value = None
 
+        workbook.Save()  # Enregistrer les modifications
 
     except Exception as e:
         print(f"Une erreur est survenue : {e}")
