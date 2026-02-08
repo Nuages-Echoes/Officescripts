@@ -28,10 +28,16 @@ def creer_feuille_chiffrage(chemin_fichier, nom_feuille):
         new_sheet.Range("H14").Value = "Montant TTC"
 
         new_sheet.Range("F15:F300").Value = "=E15*D15"
-        new_sheet.Range("H15:H300").Value = "=(F15*(1+G15/100))"
+        new_sheet.Range("H15:H300").Value = "=(F15*(1+G15))"
 
-        for cellule in new_sheet.Range("G15:G300"):
-            cellule.NumberFormat = numbers.FORMAT_PERCENTAGE
+        print("Formules insérées dans les colonnes F et H.")
+        # Insérer une ligne de total sur la ligne 15
+        new_sheet.insert_rows(15)
+        new_sheet.Range("A15").Value = "Total"
+        new_sheet.Range("F15").Formula = "=SUM(F16:F300)"
+        new_sheet.Range("H15").Formula = "=SUM(H16:H300)"
+
+
 
 
     except Exception as e:
