@@ -1,3 +1,5 @@
+from pydoc import doc
+
 import pandas as pd
 from docx import Document
 from docx.shared import RGBColor
@@ -42,6 +44,10 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
             doc.add_paragraph(str(valeur[1]), style='Heading 2')
         elif 'Titre 3' in v0:
             doc.add_paragraph(str(valeur[1]), style='Heading 3')
+        elif 'Titre 4' in v0:
+            doc.add_paragraph(str(valeur[1]), style='Heading 4')
+        elif 'Titre 5' in v0:
+            doc.add_paragraph(str(valeur[1]), style='Heading 5')
         elif 'Normal' in v0:
             doc.add_paragraph(str(valeur[1]), style='Normal')
         elif 'jaune' in v0:
@@ -119,15 +125,17 @@ def ajouter_liste_artisans(word_en_sortie, liste_artisans):
 
 def lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille):
     # Lire le fichier Excel avec pandas
-    df = pd.read_excel(param_chemin_fichier_excel, sheet_name=param_nom_feuille, usecols="D:E")
+    df = pd.read_excel(param_chemin_fichier_excel, sheet_name=param_nom_feuille, usecols="A:B")
 
-     # Créer une liste pour stocker les valeurs des cellules D10 à D12
+     # Créer une liste pour stocker les valeurs des cellules B1 à B15
     valeurs = []
 
     #Lire les valeurs de la deuxième colonne pour les lignes 4 à 8 (E10 à E14 dans Excel)
-    for index in range(1, 5):  
-        valeur = df.iloc[index, 1]  # Colonne E (index 1)
+    for index in range(0, 14):  
+        valeur = df.iloc[index, 1]  # Colonne B (index 1)
         valeurs.append(valeur)
+
+    print(f"Les valeurs du fichier Excel sont : {valeurs}")
 
     # Recupérer le numero de version dans le nom de la feuille
     param_sheet_split = param_nom_feuille.split(" ")
@@ -176,26 +184,53 @@ def mise_a_jour_signets(word_en_sortie, donnees_client):
         doc = word_app.Documents.Open(word_en_sortie)
 
         # Vérifier si le signet "AdresseProjet" existe et le remplir
-        if doc.Bookmarks.Exists("AdresseProjet"):
-            doc.Bookmarks("AdresseProjet").Range.Text = str(donnees_client[2])  
-        if doc.Bookmarks.Exists("MaitreOuvrage"):
-            doc.Bookmarks("MaitreOuvrage").Range.Text = str(donnees_client[1])  
-        if doc.Bookmarks.Exists("VersionDocument"):
-            doc.Bookmarks("VersionDocument").Range.Text = str(donnees_client[5])  # Version du document
-        if doc.Bookmarks.Exists("CoordonneesClient"):
-            doc.Bookmarks("CoordonneesClient").Range.Text = str(donnees_client[3])  # Coordonnées du client
+        if doc.Bookmarks.Exists("DescrProjet") and pd.notnull(donnees_client[0]):
+            doc.Bookmarks("DescrProjet").Range.Text = str(donnees_client[0])  # Description du projet
+        if doc.Bookmarks.Exists("DescrProjet2") and pd.notnull(donnees_client[1]):
+            doc.Bookmarks("DescrProjet2").Range.Text = str(donnees_client[1])
+        if doc.Bookmarks.Exists("DescrProjet3") and pd.notnull(donnees_client[2]):
+            doc.Bookmarks("DescrProjet3").Range.Text = str(donnees_client[2])
+        if doc.Bookmarks.Exists("DescrProjet4") and pd.notnull(donnees_client[3]):
+            doc.Bookmarks("DescrProjet4").Range.Text = str(donnees_client[3])
+        if doc.Bookmarks.Exists("DescrProjet5") and pd.notnull(donnees_client[4]):
+            doc.Bookmarks("DescrProjet5").Range.Text = str(donnees_client[4])
+        if doc.Bookmarks.Exists("MaitreOuvrage") and pd.notnull(donnees_client[5]):
+            doc.Bookmarks("MaitreOuvrage").Range.Text = str(donnees_client[5])  # Maitre d'ouvrage
+        if doc.Bookmarks.Exists("MO2") and pd.notnull(donnees_client[6]):
+            doc.Bookmarks("MO2").Range.Text = str(donnees_client[6])  # Maitre d'ouvrage 2
+        if doc.Bookmarks.Exists("AdresseProjet") and pd.notnull(donnees_client[7]):
+            doc.Bookmarks("AdresseProjet").Range.Text = str(donnees_client[7])  # Adresse du projet
+        if doc.Bookmarks.Exists("Ville") and pd.notnull(donnees_client[9]):
+            doc.Bookmarks("Ville").Range.Text = str(donnees_client[9])  # Ville et Code Postal
+        if doc.Bookmarks.Exists("ComplementAdresse") and pd.notnull(donnees_client[8]):
+            doc.Bookmarks("ComplementAdresse").Range.Text = str(donnees_client[8])  # Complément d'adresse
+        if doc.Bookmarks.Exists("CoordonneesClient") and pd.notnull(donnees_client[10]):
+            doc.Bookmarks("CoordonneesClient").Range.Text = str(donnees_client[10])  # Téléphone MO1
+        if doc.Bookmarks.Exists("TelephoneMO2") and pd.notnull(donnees_client[11]):
+            doc.Bookmarks("TelephoneMO2").Range.Text = str(donnees_client[11])  # Téléphone MO2
+        if doc.Bookmarks.Exists("EmailMO") and pd.notnull(donnees_client[12]):
+            doc.Bookmarks("EmailMO").Range.Text = str(donnees_client[12])  # Email du client
+        if doc.Bookmarks.Exists("EmailMO2") and pd.notnull(donnees_client[13]):
+            doc.Bookmarks("EmailMO2").Range.Text = str(donnees_client[13])  # Email du client 2
+        if doc.Bookmarks.Exists("VersionDocument") and pd.notnull(donnees_client[14]):
+            doc.Bookmarks("VersionDocument").Range.Text = str(donnees_client[14])  # Version du document
+
+
+            
         
         # On modifie le titre du document en fonction du type de document
         if doc.Bookmarks.Exists("TypeDocument"):
-            if str(donnees_client[4]) == "AVP":
+            if "AVP" in str(word_en_sortie):
                 doc.Bookmarks("TypeDocument").Range.Text = "Etude d'Avant-Projet \n(AVP)"
-            elif str(donnees_client[4]) == "CCTP":
+            elif "CCTP" in str(word_en_sortie):
                 doc.Bookmarks("TypeDocument").Range.Text = "Cahier des Clauses Techniques Particulières \n(CCTP)"
+            else:
+                doc.Bookmarks("TypeDocument").Range.Text = "Ce n'est ni un AVP ni un CCTP, vérifier le nom de la feuille Excel"
         
         # On ajout la date du jour au format jj mois aaaa
         if doc.Bookmarks.Exists("DateGen"):
             # Définir la locale en français pour obtenir le nom du mois en français
-            locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+            locale.setlocale(locale.LC_TIME, 'fr_FR')
             date_aujourdhui = datetime.datetime.now()
             date_formatee = date_aujourdhui.strftime("%d %B %Y")
             doc.Bookmarks("DateGen").Range.Text = date_formatee
@@ -225,17 +260,18 @@ if __name__ == "__main__":
     # Chemins des fichiers
     word_en_entree = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'DSTest.docx')  # Remplacez par le chemin de votre fichier Word
 
-    donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
-    print(f"Les données client sont : {donnees_client}")
+    #donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
+    #print(f"Les données client sont : {donnees_client}")
     try:
         # Vérifier si le fichier source existe
         if not os.path.exists(word_en_entree):
             raise FileNotFoundError(f"Le fichier source {word_en_entree} n'existe pas.")
 
         # Lire les informations client du fichier Excel
-        donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, param_nom_feuille)
+        donnees_client = lire_donnees_client_excel(param_chemin_fichier_excel, "Coordonnees")
+        print(f"Les données client sont : {donnees_client}")
         # Définir le chemin du fichier Word de sortie qui va être dans le même dossier que le fichier Excel
-        word_en_sortie = os.path.dirname(param_chemin_fichier_excel) + "\\" + str(donnees_client[1]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
+        word_en_sortie = os.path.dirname(param_chemin_fichier_excel) + "\\" + str(donnees_client[5]) + "_" + str(param_nom_feuille)+ ".docx"
         # word_en_sortie = os.getcwd() + "\\" + str(donnees_client[0]) + "_" + str(donnees_client[4]) + "_V" + str(donnees_client[5]) + ".docx"
         # Copier le fichier
         shutil.copy(word_en_entree, word_en_sortie)
