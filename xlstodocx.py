@@ -15,12 +15,12 @@ def lire_trois_premieres_colonnes_excel(chemin_fichier_excel, nom_feuille):
     df = pd.read_excel(chemin_fichier_excel, sheet_name=nom_feuille, skiprows=13)
 
     # Extraire les trois premières colonnes
-    trois_premieres_colonnes = df.iloc[:, :3]  # Sélectionne les trois premières colonnes
+    trois_premieres_colonnes = df.iloc[:, :3]
     trois_premieres_colonnes = trois_premieres_colonnes.values.tolist()
 
     # changer le nom de la feuille si c'est CCTP pour pointer sur la feuille AVP correspondante
     # car seules les feuilles AVP contiennent la liste des artisans
-    if "CCTP" in nom_feuille:   
+    if "CCTP" in nom_feuille:
         nom_feuille = nom_feuille.replace("CCTP", "AVP")
         df = pd.read_excel(chemin_fichier_excel, sheet_name=nom_feuille, skiprows=13)
         troisieme_colonne = df.iloc[:, 2]  # Sélectionne la troisième colonne
@@ -81,9 +81,10 @@ def ajouter_dans_fichier_word(word_en_sortie, donnees):
             if 'barre' in v0 or 'barré' in v0:
                 run.font.strike = True  # Appliquer le style barré
         elif 'barre' in v0 or 'barré' in v0:
-            paragraph = doc.add_paragraph()
-            run = paragraph.add_run(str(valeur[1]))
-            run.font.strike = True  # Appliquer le style barré
+            if "AVP" in str(word_en_sortie):
+                paragraph = doc.add_paragraph()
+                run = paragraph.add_run(str(valeur[1]))
+                run.font.strike = True  # Appliquer le style barré
         else:
             if str(valeur[1]) != 'nan':  # Vérifier si la deuxième colonne n'est pas vide
                 doc.add_paragraph(str(valeur[1]), style='Normal')
@@ -283,7 +284,7 @@ if __name__ == "__main__":
 
 
     # Lire les 3 premières colonnes du fichier Excel et obtenir la liste des artisans
-    donnees_premiere_colonne, liste_artisans = lire_trois_premieres_colonnes_excel(param_chemin_fichier_excel, param_nom_feuille)
+    donnees_premieres_colonnes, liste_artisans = lire_trois_premieres_colonnes_excel(param_chemin_fichier_excel, param_nom_feuille)
 
     # Creer la liste des artisans uniques
     print(liste_artisans)
@@ -293,7 +294,7 @@ if __name__ == "__main__":
 
 
     # Ajouter les données dans le fichier Word existant
-    ajouter_dans_fichier_word(word_en_sortie, donnees_premiere_colonne)
+    ajouter_dans_fichier_word(word_en_sortie, donnees_premieres_colonnes)
 
     # Ajouter la liste des artisans si le document est un CCTP
     if "CCTP" in word_en_sortie:
